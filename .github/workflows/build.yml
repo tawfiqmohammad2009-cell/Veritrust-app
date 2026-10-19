@@ -28,16 +28,13 @@ jobs:
           mv temp_tools/cmdline-tools/* $HOME/android-sdk/cmdline-tools/latest/
           rm -rf cmdline-tools.zip temp_tools
 
-          # Set up environment variables for GitHub Actions
           echo "ANDROID_HOME=$HOME/android-sdk" >> $GITHUB_ENV
           echo "$HOME/android-sdk/cmdline-tools/latest/bin" >> $GITHUB_PATH
           echo "$HOME/android-sdk/platform-tools" >> $GITHUB_PATH
 
-          # Export for the current step session
           export ANDROID_HOME=$HOME/android-sdk
           export PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools
 
-          # Accept licenses and install required packages
           yes | sdkmanager --licenses || true
           sdkmanager --update
           sdkmanager "platform-tools" "platforms;android-34" "build-tools;34.0.0"
@@ -47,14 +44,32 @@ jobs:
           export ANDROID_HOME=$HOME/android-sdk
           export PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools
 
-          mkdir -p build/classes build/gen
-          $ANDROID_HOME/build-tools/34.0.0/aapt package -f -m -J build/gen -S app/src/main/res -M app/src/main/AndroidManifest.xml -I $ANDROID_HOME/platforms/android-34/android.jar
-          javac -d build/classes -classpath $ANDROID_HOME/platforms/android-34/android.jar app/src/main/java/com/veritrust/shield/MainActivity.java
-          $ANDROID_HOME/build-tools/34.0.0/d8 --output build/ app/src/main/java/com/veritrust/shield/*.class build/classes/com/veritrust/shield/*.class
-          $ANDROID_HOME/build-tools/34.0.0/aapt package -f -M app/src/main/AndroidManifest.xml -S app/src/main/res -I $ANDROID_HOME/platforms/android-34/android.jar -F build/veritrust-unsigned.apk
+          # Ensure required build directories exist
+          mkdir -p build/classes build/gen app/src/main/res
+
+          # Find manifest location
+          MANIFEST_PATH="app/src/main/AndroidManifest.xml"
+          if [ ! -f "$MANIFEST_PATH" ]; then
+            MANIFEST_PATH="AndroidManifest.xml"
+          fi
+
+          # Find resource path
+          RES_PATH="app/src/main/res"
+          if [ -d "res" ]; then
+            RES_PATH="res"
+          fi
+
+          $ANDROID_HOME/build-tools/34.0.0/aapt package -f -m -J build/gen -S $RES_PATH -M $MANIFEST_PATH -I $ANDROID_HOME/platforms/android-34/android.jar
+          
+          javac -d build/classes -classpath $ANDROID_HOME/platforms/android-34/android.jar $(find app/src/main/java -name "*.java" 2>/dev/null || find . -name "*.java")
+          
+          $ANDROID_HOME/build-tools/34.0.0/d8 --output build/ $(find build/classes -name "*.class")
+          
+          $ANDROID_HOME/build-tools/34.0.0/aapt package -f -M $MANIFEST_PATH -S $RES_PATH -I $ANDROID_HOME/platforms/android-34/android.jar -F build/veritrust-unsigned.apk
+          
           cd build && $ANDROID_HOME/build-tools/34.0.0/aapt add veritrust-unsigned.apk classes.dex && cd ..
           
-          # Generate debug key and sign
+          # Keygen and sign
           keytool -genkey -v -keystore debug.keystore -alias androiddebugkey -keyalg RSA -keysize 2048 -validity 10000 -storepass android -keypass android -dname "CN=Android Debug,O=Android,C=US"
           $ANDROID_HOME/build-tools/34.0.0/apksigner sign --ks debug.keystore --ks-pass pass:android --out build/Veritrust.apk build/veritrust-unsigned.apk
 
