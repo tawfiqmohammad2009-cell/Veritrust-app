@@ -10,8 +10,6 @@ import android.os.Bundle;
 import android.provider.Settings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
 
 public class MainActivity extends Activity {
     private static final int PERMISSION_REQUEST_CODE = 123;
@@ -36,15 +34,14 @@ public class MainActivity extends Activity {
                         Uri.parse("package:" + getPackageName()));
                 startActivity(intent);
             }
-        }
 
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED ||
-            ContextCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[]{
-                Manifest.permission.RECORD_AUDIO,
-                Manifest.permission.READ_PHONE_STATE
-            }, PERMISSION_REQUEST_CODE);
+            if (checkSelfPermission(Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED ||
+                checkSelfPermission(Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(new String[]{
+                    Manifest.permission.RECORD_AUDIO,
+                    Manifest.permission.READ_PHONE_STATE
+                }, PERMISSION_REQUEST_CODE);
+            }
         }
     }
 }
-

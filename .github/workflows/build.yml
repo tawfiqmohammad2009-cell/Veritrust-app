@@ -44,32 +44,34 @@ jobs:
           export ANDROID_HOME=$HOME/android-sdk
           export PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools
 
-          # Ensure required build directories exist
           mkdir -p build/classes build/gen app/src/main/res
 
-          # Find manifest location
           MANIFEST_PATH="app/src/main/AndroidManifest.xml"
           if [ ! -f "$MANIFEST_PATH" ]; then
             MANIFEST_PATH="AndroidManifest.xml"
           fi
 
-          # Find resource path
           RES_PATH="app/src/main/res"
           if [ -d "res" ]; then
             RES_PATH="res"
           fi
 
+          # 1. Generate R.java
           $ANDROID_HOME/build-tools/34.0.0/aapt package -f -m -J build/gen -S $RES_PATH -M $MANIFEST_PATH -I $ANDROID_HOME/platforms/android-34/android.jar
-          
-          javac -d build/classes -classpath $ANDROID_HOME/platforms/android-34/android.jar $(find app/src/main/java -name "*.java" 2>/dev/null || find . -name "*.java")
-          
-          $ANDROID_HOME/build-tools/34.0.0/d8 --output build/ $(find build/classes -name "*.class")
-          
+
+          # 2. Compile Java sources
+          find . -name "*.java" > sources.txt
+          javac -d build/classes -classpath $ANDROID_HOME/platforms/android-34/android.jar @sources.txt
+
+          # 3. Dex classes
+          find build/classes -name "*.class" > classes.txt
+          $ANDROID_HOME/build-tools/34.0.0/d8 --output build/ @classes.txt
+
+          # 4. Package resources and dex
           $ANDROID_HOME/build-tools/34.0.0/aapt package -f -M $MANIFEST_PATH -S $RES_PATH -I $ANDROID_HOME/platforms/android-34/android.jar -F build/veritrust-unsigned.apk
-          
           cd build && $ANDROID_HOME/build-tools/34.0.0/aapt add veritrust-unsigned.apk classes.dex && cd ..
-          
-          # Keygen and sign
+
+          # 5. Keystore & Sign
           keytool -genkey -v -keystore debug.keystore -alias androiddebugkey -keyalg RSA -keysize 2048 -validity 10000 -storepass android -keypass android -dname "CN=Android Debug,O=Android,C=US"
           $ANDROID_HOME/build-tools/34.0.0/apksigner sign --ks debug.keystore --ks-pass pass:android --out build/Veritrust.apk build/veritrust-unsigned.apk
 
