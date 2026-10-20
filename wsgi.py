@@ -6,14 +6,13 @@ import ecdsa
 from ecdsa import VerifyingKey, BadSignatureError
 import sqlite3
 
-# Import our new aarch64 feature extractor and TFLite inference module
 from features import extract_log_mel_spectrogram
 from inference import DeepfakeDetector
 
 app = Flask(__name__)
 DB_PATH = "veritrust.db"
 
-# Initialize TFLite deepfake detector safely (handles missing model file gracefully during testing)
+# Initialize TFLite deepfake detector safely
 try:
     detector = DeepfakeDetector("veritrust_audio.tflite")
     MODEL_LOADED = True
@@ -21,7 +20,6 @@ except Exception as e:
     print(f"[Warning] TFLite model not loaded: {e}. Running in simulation/fallback mode.")
     MODEL_LOADED = False
 
-# In-memory store for active handshake challenges (nonce tracking)
 ACTIVE_CHALLENGES = {}
 
 def init_db():
@@ -37,6 +35,9 @@ def init_db():
     ''')
     conn.commit()
     conn.close()
+
+# Initialize database on module load for Gunicorn
+init_db()
 
 def get_db():
     conn = sqlite3.connect(DB_PATH)
@@ -69,103 +70,25 @@ def dashboard():
                 margin: 0;
                 padding: 16px;
             }
-            .hud-container {
-                max-width: 480px;
-                margin: 0 auto;
-            }
-            .header {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                margin-bottom: 20px;
-            }
-            .title {
-                font-size: 22px;
-                font-weight: 700;
-                color: var(--accent-blue);
-                letter-spacing: 1px;
-            }
-            .card {
-                background: var(--card-bg);
-                border-radius: 16px;
-                padding: 20px;
-                margin-bottom: 16px;
-                border: 1px solid #1f2937;
-                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
-            }
-            .shield-toggle {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-            }
-            .switch {
-                position: relative;
-                display: inline-block;
-                width: 50px;
-                height: 26px;
-            }
+            .hud-container { max-width: 480px; margin: 0 auto; }
+            .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+            .title { font-size: 22px; font-weight: 700; color: var(--accent-blue); letter-spacing: 1px; }
+            .card { background: var(--card-bg); border-radius: 16px; padding: 20px; margin-bottom: 16px; border: 1px solid #1f2937; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5); }
+            .shield-toggle { display: flex; justify-content: space-between; align-items: center; }
+            .switch { position: relative; display: inline-block; width: 50px; height: 26px; }
             .switch input { opacity: 0; width: 0; height: 0; }
-            .slider {
-                position: absolute;
-                cursor: pointer;
-                top: 0; left: 0; right: 0; bottom: 0;
-                background-color: #374151;
-                transition: .4s;
-                border-radius: 34px;
-            }
-            .slider:before {
-                position: absolute;
-                content: "";
-                height: 18px; width: 18px;
-                left: 4px; bottom: 4px;
-                background-color: white;
-                transition: .4s;
-                border-radius: 50%;
-            }
+            .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #374151; transition: .4s; border-radius: 34px; }
+            .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
             input:checked + .slider { background-color: var(--accent-green); }
             input:checked + .slider:before { transform: translateX(24px); }
-
-            .overlay-hud {
-                background: rgba(17, 24, 39, 0.95);
-                border: 2px solid var(--accent-blue);
-                border-radius: 12px;
-                padding: 16px;
-                text-align: center;
-                backdrop-filter: blur(8px);
-            }
-            .hud-status {
-                font-size: 18px;
-                font-weight: 800;
-                margin-top: 8px;
-            }
+            .overlay-hud { background: rgba(17, 24, 39, 0.95); border: 2px solid var(--accent-blue); border-radius: 12px; padding: 16px; text-align: center; backdrop-filter: blur(8px); }
+            .hud-status { font-size: 18px; font-weight: 800; margin-top: 8px; }
             .status-safe { color: var(--accent-green); }
             .status-warn { color: var(--accent-red); }
-
-            .score-bar-bg {
-                background: #374151;
-                height: 10px;
-                border-radius: 5px;
-                margin-top: 12px;
-                overflow: hidden;
-            }
-            .score-bar-fill {
-                background: var(--accent-green);
-                height: 100%;
-                width: 100%;
-                transition: width 0.5s ease;
-            }
-            .log-list {
-                list-style: none;
-                padding: 0;
-                margin: 0;
-                font-size: 14px;
-            }
-            .log-item {
-                display: flex;
-                justify-content: space-between;
-                padding: 10px 0;
-                border-bottom: 1px solid #1f2937;
-            }
+            .score-bar-bg { background: #374151; height: 10px; border-radius: 5px; margin-top: 12px; overflow: hidden; }
+            .score-bar-fill { background: var(--accent-green); height: 100%; width: 100%; transition: width 0.5s ease; }
+            .log-list { list-style: none; padding: 0; margin: 0; font-size: 14px; }
+            .log-item { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #1f2937; }
             .log-item:last-child { border-bottom: none; }
         </style>
     </head>
@@ -175,7 +98,6 @@ def dashboard():
                 <div class="title">VERITRUST</div>
                 <span style="font-size: 12px; color: var(--accent-green);">● SYSTEM ONLINE</span>
             </div>
-
             <div class="card overlay-hud" id="hud-banner">
                 <div style="font-size: 12px; color: var(--text-muted); letter-spacing: 1.5px;">IN-CALL FORENSIC HUD</div>
                 <div class="hud-status status-safe" id="hud-status-text">VERIFIED HUMAN</div>
@@ -184,7 +106,6 @@ def dashboard():
                 </div>
                 <div style="font-size: 12px; margin-top: 8px; color: var(--text-muted);" id="hud-score-label">Trust Score: 100.0%</div>
             </div>
-
             <div class="card shield-toggle">
                 <div>
                     <div style="font-weight: 600;">Active Identity Shield</div>
@@ -195,7 +116,6 @@ def dashboard():
                     <span class="slider"></span>
                 </label>
             </div>
-
             <div class="card">
                 <div style="font-weight: 600; margin-bottom: 12px;">Call Safety History</div>
                 <ul class="log-list">
@@ -213,7 +133,6 @@ def dashboard():
                     </li>
                 </ul>
             </div>
-
             <div class="card">
                 <div style="font-weight: 600; margin-bottom: 12px;">Settings & Security</div>
                 <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 14px;">
@@ -230,7 +149,6 @@ def dashboard():
                 </div>
             </div>
         </div>
-
         <script>
             async function pollTrustScore() {
                 try {
@@ -240,7 +158,6 @@ def dashboard():
                         const score = data.trust_score;
                         document.getElementById('trust-bar').style.width = score + '%';
                         document.getElementById('hud-score-label').innerText = 'Trust Score: ' + score.toFixed(1) + '%';
-
                         const statusText = document.getElementById('hud-status-text');
                         if (score < 50.0) {
                             statusText.innerText = 'WARNING: DEEPFAKE DETECTED';
@@ -269,10 +186,8 @@ def register_user():
     user_id = data.get('user_id')
     device_hardware_hash = data.get('device_hardware_hash')
     public_key = data.get('public_key')
-
     if not all([user_id, device_hardware_hash, public_key]):
         return jsonify({"status": "error", "message": "Missing required fields"}), 400
-
     try:
         conn = get_db()
         cursor = conn.cursor()
@@ -290,25 +205,20 @@ def register_user():
 def initiate_hardware_handshake():
     data = request.get_json() or {}
     user_id = data.get('user_id')
-
     if not user_id:
         return jsonify({"status": "error", "message": "Missing user_id"}), 400
-
     conn = get_db()
     cursor = conn.cursor()
     cursor.execute("SELECT device_hardware_hash FROM users WHERE user_id = ?", (user_id,))
     row = cursor.fetchone()
     conn.close()
-
     if not row:
         return jsonify({"status": "error", "message": "User not found"}), 404
-
     challenge_nonce = secrets.token_hex(16)
     ACTIVE_CHALLENGES[user_id] = {
         "nonce": challenge_nonce,
         "expires_at": time.time() + 300
     }
-
     return jsonify({
         "status": "success",
         "user_id": user_id,
@@ -321,46 +231,25 @@ def verify_hardware_handshake():
     data = request.get_json() or {}
     user_id = data.get('user_id')
     device_hardware_hash = data.get('device_hardware_hash')
-
     if not all([user_id, device_hardware_hash]):
         return jsonify({"status": "error", "message": "Missing user_id or hardware hash"}), 400
-
     if user_id not in ACTIVE_CHALLENGES:
         return jsonify({"status": "error", "message": "No active handshake session found. Initiate first."}), 400
-
     session = ACTIVE_CHALLENGES[user_id]
     if time.time() > session["expires_at"]:
         del ACTIVE_CHALLENGES[user_id]
         return jsonify({"status": "error", "message": "Handshake session expired."}), 401
-
     conn = get_db()
     cursor = conn.cursor()
     cursor.execute("SELECT device_hardware_hash, trust_score FROM users WHERE user_id = ?", (user_id,))
     row = cursor.fetchone()
     conn.close()
-
     if not row:
         return jsonify({"status": "error", "message": "User not found"}), 404
-
-    stored_hardware_hash = row['device_hardware_hash']
-    trust_score = row['trust_score']
-
-    if device_hardware_hash != stored_hardware_hash:
-        return jsonify({
-            "status": "failed",
-            "hardware_status": "MISMATCH",
-            "message": "Device hardware hash verification failed. Potential node spoofing detected."
-        }), 403
-
+    if device_hardware_hash != row['device_hardware_hash']:
+        return jsonify({"status": "failed", "hardware_status": "MISMATCH", "message": "Device hardware hash verification failed."}), 403
     del ACTIVE_CHALLENGES[user_id]
-
-    return jsonify({
-        "status": "success",
-        "hardware_status": "VERIFIED",
-        "user_id": user_id,
-        "trust_score": trust_score,
-        "message": "Device hardware binding verified successfully."
-    }), 200
+    return jsonify({"status": "success", "hardware_status": "VERIFIED", "user_id": user_id, "trust_score": row['trust_score']}), 200
 
 @app.route('/api/v1/handshake/dual-verify', methods=['POST'])
 def dual_verify_handshake():
@@ -368,78 +257,47 @@ def dual_verify_handshake():
     user_id = data.get('user_id')
     token = data.get('token')
     signature_hex = data.get('signature')
-
     if not all([user_id, token, signature_hex]):
         return jsonify({"status": "error", "message": "Missing required fields"}), 400
-
     try:
         nonce, timestamp_str = token.split(":")
         timestamp = int(timestamp_str)
     except (ValueError, AttributeError):
-        return jsonify({"status": "error", "message": "Invalid token format. Expected nonce:timestamp"}), 400
-
-    current_time = int(time.time())
-    if abs(current_time - timestamp) > 300:
-        return jsonify({"status": "error", "message": "Token expired or clock drift out of bounds"}), 401
-
+        return jsonify({"status": "error", "message": "Invalid token format."}), 400
+    if abs(int(time.time()) - timestamp) > 300:
+        return jsonify({"status": "error", "message": "Token expired"}), 401
     conn = get_db()
     cursor = conn.cursor()
     cursor.execute("SELECT public_key, trust_score FROM users WHERE user_id = ?", (user_id,))
     row = cursor.fetchone()
     conn.close()
-
     if not row:
         return jsonify({"status": "error", "message": "User not found"}), 404
-
-    public_key_hex = row['public_key']
-    trust_score = row['trust_score']
-
     try:
-        vk = VerifyingKey.from_string(bytes.fromhex(public_key_hex), curve=ecdsa.SECP256k1)
-        signature = bytes.fromhex(signature_hex)
-        message_hash = hashlib.sha256(token.encode('utf-8')).digest()
-        is_valid = vk.verify_digest(signature, message_hash)
-    except (BadSignatureError, ValueError, Exception) as e:
-        return jsonify({
-            "status": "failed",
-            "cryptographic_status": "INVALID",
-            "message": f"Signature verification failed: {str(e)}"
-        }), 403
-
+        vk = VerifyingKey.from_string(bytes.fromhex(row['public_key']), curve=ecdsa.SECP256k1)
+        is_valid = vk.verify_digest(bytes.fromhex(signature_hex), hashlib.sha256(token.encode('utf-8')).digest())
+    except Exception as e:
+        return jsonify({"status": "failed", "cryptographic_status": "INVALID", "message": str(e)}), 403
     if is_valid:
-        return jsonify({
-            "status": "success",
-            "cryptographic_status": "VERIFIED",
-            "user_id": user_id,
-            "trust_score": trust_score,
-            "message": "Dual-user cryptographic handshake successful."
-        }), 200
-
+        return jsonify({"status": "success", "cryptographic_status": "VERIFIED", "user_id": user_id, "trust_score": row['trust_score']}), 200
     return jsonify({"status": "failed", "cryptographic_status": "REJECTED"}), 403
 
 @app.route('/api/v1/verify-audio', methods=['POST'])
 def verify_audio():
-    # Supports both raw binary audio streams (TFLite inference) and JSON dashboard polls
     if request.content_type == 'application/octet-stream' or (request.data and not request.is_json):
         audio_bytes = request.data
         if not audio_bytes:
             return jsonify({"status": "error", "message": "Empty audio payload"}), 400
-
         user_id = request.headers.get('X-User-ID', 'user_alpha_01')
-
         conn = get_db()
         cursor = conn.cursor()
         cursor.execute("SELECT trust_score FROM users WHERE user_id = ?", (user_id,))
         row = cursor.fetchone()
-
+        current_score = row['trust_score'] if row else 100.0
         if not row:
             cursor.execute("INSERT OR IGNORE INTO users (user_id, trust_score) VALUES (?, ?)", (user_id, 100.0))
             conn.commit()
-            current_score = 100.0
-        else:
-            current_score = row['trust_score']
 
-        # Run TFLite inference if model is present, else simulate
         if MODEL_LOADED:
             features = extract_log_mel_spectrogram(audio_bytes)
             spoof_score = detector.predict(features)
@@ -448,65 +306,29 @@ def verify_audio():
             spoof_score = 0.1234
             verdict = "BONAFIDE"
 
-        # Apply trust index engine rules (+2.0 boost or -15.0 penalty)
-        if verdict == "SPOOF":
-            new_score = max(0.0, current_score - 15.0)
-        else:
-            new_score = min(100.0, current_score + 2.0)
-
+        new_score = max(0.0, current_score - 15.0) if verdict == "SPOOF" else min(100.0, current_score + 2.0)
         cursor.execute("UPDATE users SET trust_score = ? WHERE user_id = ?", (new_score, user_id))
         conn.commit()
         conn.close()
-
-        return jsonify({
-            "status": "success",
-            "user_id": user_id,
-            "verdict": verdict,
-            "spoof_score": round(spoof_score, 4),
-            "previous_trust_score": current_score,
-            "updated_trust_score": new_score,
-            "message": "Raw audio inference processed successfully."
-        }), 200
-
+        return jsonify({"status": "success", "user_id": user_id, "verdict": verdict, "spoof_score": round(spoof_score, 4), "updated_trust_score": new_score}), 200
     else:
-        # JSON payload handling (keeps your web dashboard HUD loop fully functional)
         data = request.get_json() or {}
         user_id = data.get('user_id', 'user_alpha_01')
         verdict = data.get('verdict', 'BONAFIDE').upper()
-
-        if verdict not in ["SPOOF", "BONAFIDE"]:
-            return jsonify({"status": "error", "message": "Invalid verdict. Must be 'SPOOF' or 'BONAFIDE'"}), 400
-
         conn = get_db()
         cursor = conn.cursor()
         cursor.execute("SELECT trust_score FROM users WHERE user_id = ?", (user_id,))
         row = cursor.fetchone()
-
+        current_score = row['trust_score'] if row else 100.0
         if not row:
             cursor.execute("INSERT OR IGNORE INTO users (user_id, trust_score) VALUES (?, ?)", (user_id, 100.0))
             conn.commit()
-            current_score = 100.0
-        else:
-            current_score = row['trust_score']
 
-        if verdict == "SPOOF":
-            new_score = max(0.0, current_score - 15.0)
-        else:
-            new_score = min(100.0, current_score + 2.0)
-
+        new_score = max(0.0, current_score - 15.0) if verdict == "SPOOF" else min(100.0, current_score + 2.0)
         cursor.execute("UPDATE users SET trust_score = ? WHERE user_id = ?", (new_score, user_id))
         conn.commit()
         conn.close()
-
-        return jsonify({
-            "status": "success",
-            "user_id": user_id,
-            "verdict": verdict,
-            "spoof_score": 0.0 if verdict == "BONAFIDE" else 0.85,
-            "previous_trust_score": current_score,
-            "updated_trust_score": new_score,
-            "message": "Audio verdict processed. Trust score updated."
-        }), 200
+        return jsonify({"status": "success", "user_id": user_id, "verdict": verdict, "updated_trust_score": new_score}), 200
 
 @app.route('/api/v1/score/<user_id>', methods=['GET'])
 def get_user_score(user_id):
@@ -518,8 +340,3 @@ def get_user_score(user_id):
     if not row:
         return jsonify({"status": "success", "trust_score": 100.0})
     return jsonify({"status": "success", "trust_score": row['trust_score']})
-
-if __name__ == '__main__':
-    init_db()
-    app.run(host='0.0.0.0', port=5000)
-
