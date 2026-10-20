@@ -15,6 +15,7 @@
     <application
         android:allowBackup="true"
         android:label="Veritrust"
+        android:usesCleartextTraffic="true"
         android:theme="@android:style/Theme.NoTitleBar.Fullscreen">
 
         <activity
