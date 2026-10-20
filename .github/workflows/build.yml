@@ -63,15 +63,16 @@ jobs:
           find . -name "*.java" > sources.txt
           javac -d build/classes -classpath $ANDROID_HOME/platforms/android-34/android.jar @sources.txt
 
-          # 3. Dex classes
+          # 3. Dex classes with SDK library reference
           find build/classes -name "*.class" > classes.txt
-          $ANDROID_HOME/build-tools/34.0.0/d8 --output build/ @classes.txt
+          $ANDROID_HOME/build-tools/34.0.0/d8 --lib $ANDROID_HOME/platforms/android-34/android.jar --output build/ @classes.txt
 
           # 4. Package resources and dex
           $ANDROID_HOME/build-tools/34.0.0/aapt package -f -M $MANIFEST_PATH -S $RES_PATH -I $ANDROID_HOME/platforms/android-34/android.jar -F build/veritrust-unsigned.apk
           cd build && $ANDROID_HOME/build-tools/34.0.0/aapt add veritrust-unsigned.apk classes.dex && cd ..
 
-          # 5. Keystore & Sign
+          # 5. Clean old keystore, generate fresh one, and sign
+          rm -f debug.keystore
           keytool -genkey -v -keystore debug.keystore -alias androiddebugkey -keyalg RSA -keysize 2048 -validity 10000 -storepass android -keypass android -dname "CN=Android Debug,O=Android,C=US"
           $ANDROID_HOME/build-tools/34.0.0/apksigner sign --ks debug.keystore --ks-pass pass:android --out build/Veritrust.apk build/veritrust-unsigned.apk
 
