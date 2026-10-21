@@ -32,7 +32,7 @@ public class VeritrustCallService extends InCallService {
             @Override
             public void run() {
                 try {
-                    URL url = new URL("http://10.0.2.2:5000/log_call");
+                    URL url = new URL("http://127.0.0.1:5000/log_call");
                     HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                     conn.setRequestMethod("POST");
                     conn.setRequestProperty("Content-Type", "application/json; utf-8");

@@ -1,3 +1,8 @@
+import android.app.role.RoleManager;
+import android.content.Context;
+import android.content.Intent;
+import android.os.Build;
+import android.widget.Toast;
 package com.veritrust.shield;
 
 import android.Manifest;
@@ -16,7 +21,13 @@ public class MainActivity extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+        super.onCreate(
+
+        Button defaultDialerButton = findViewById(R.id.btnDefaultDialer);
+        if (defaultDialerButton != null) {
+            defaultDialerButton.setOnClickListener(v -> requestDefaultDialerRole());
+        }
+savedInstanceState);
 
         WebView webView = new WebView(this);
         webView.getSettings().setJavaScriptEnabled(true);
@@ -44,4 +55,23 @@ public class MainActivity extends Activity {
             }
         }
     }
+
+    public void requestDefaultDialerRole() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            RoleManager roleManager = (RoleManager) getSystemService(Context.ROLE_SERVICE);
+            if (roleManager != null) {
+                if (!roleManager.isRoleHeld(RoleManager.ROLE_DIALER)) {
+                    Intent intent = roleManager.createRequestRoleIntent(RoleManager.ROLE_DIALER);
+                    startActivityForResult(intent, 2026);
+                } else {
+                    Toast.makeText(this, "VeriTrust is already your default phone app!", Toast.LENGTH_SHORT).show();
+                }
+            }
+        } else {
+            Intent intent = new Intent(android.telecom.TelecomManager.ACTION_CHANGE_DEFAULT_DIALER);
+            intent.putExtra(android.telecom.TelecomManager.EXTRA_CHANGE_DEFAULT_DIALER_PACKAGE_NAME, getPackageName());
+            startActivity(intent);
+        }
+    }
+
 }
