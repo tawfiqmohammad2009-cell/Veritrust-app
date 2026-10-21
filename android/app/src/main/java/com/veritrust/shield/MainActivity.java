@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.Gravity;
-import android.view.View;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
@@ -27,14 +26,12 @@ public class MainActivity extends Activity {
         Button navLookup = findViewById(R.id.nav_lookup);
         Button navShield = findViewById(R.id.nav_shield);
 
-        // Default view: Section 1 (Dialer Hub)
         showSection1Dialer();
 
         navDialer.setOnClickListener(v -> showSection1Dialer());
         navLookup.setOnClickListener(v -> showSection2Lookup());
         navShield.setOnClickListener(v -> showSection3AIShield());
 
-        // Request default phone handler role for API 29+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             RoleManager roleManager = getSystemService(RoleManager.class);
             if (roleManager != null && roleManager.isRoleAvailable(RoleManager.ROLE_DIALER)) {
@@ -50,10 +47,10 @@ public class MainActivity extends Activity {
         LinearLayout layout = new LinearLayout(this);
         layout.setOrientation(LinearLayout.VERTICAL);
         layout.setGravity(Gravity.CENTER);
-        
+
         TextView tv = new TextView(this);
-        tv.setText("Section 1: Dialer & Communications\n[Keypad & Call Logs Active]");
-        tv.setTextColor(android.graphics.Color.WHITE;
+        tv.setText("Section 1: Dialer & Calls\n[Keypad, Logs, & Messaging]");
+        tv.setTextColor(android.graphics.Color.WHITE);
         tv.setGravity(Gravity.CENTER);
         layout.addView(tv);
 
@@ -67,7 +64,7 @@ public class MainActivity extends Activity {
         layout.setGravity(Gravity.CENTER);
 
         TextView tv = new TextView(this);
-        tv.setText("Section 2: Number Check Lookup\n[Enter number to verify safety]");
+        tv.setText("Section 2: Number Lookup\n[Identify & Verify Numbers]");
         tv.setTextColor(android.graphics.Color.WHITE);
         tv.setGravity(Gravity.CENTER);
         layout.addView(tv);
@@ -82,7 +79,7 @@ public class MainActivity extends Activity {
         layout.setGravity(Gravity.CENTER);
 
         TextView tv = new TextView(this);
-        tv.setText("Section 3: AI Clone Voice Detector\n[Real-time Audio Analysis Active]");
+        tv.setText("Section 3: AI Voice Clone Shield\n[Real-time Call Analysis]");
         tv.setTextColor(android.graphics.Color.WHITE);
         tv.setGravity(Gravity.CENTER);
         layout.addView(tv);
