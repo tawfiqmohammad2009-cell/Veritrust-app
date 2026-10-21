@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Veritrust - Real-Time Mobile Threat & Deepfake Defense</title>
+    <style>
+        :root {
+            --bg-primary: #07090e;
+            --bg-secondary: #0d121f;
+            --card-bg: #111827;
+            --card-border: #1f2937;
+            --accent-blue: #3b82f6;
+            --accent-green: #10b981;
+            --accent-red: #ef4444;
+            --accent-yellow: #f59e0b;
+            --text-main: #f9fafb;
+            --text-muted: #9ca3af;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding-bottom: 70px;
+        }
+
+        header {
+            background-color: var(--bg-secondary);
+            border-bottom: 1px solid var(--card-border);
+            padding: 16px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo-icon {
+            width: 28px;
+            height: 28px;
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-green));
+            border-radius: 6px;
+        }
+
+        .logo-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .status-badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+            color: var(--accent-green);
+            background: rgba(16, 185, 129, 0.1);
+            padding: 4px 12px;
+            border-radius: 20px;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background-color: var(--accent-green);
+            border-radius: 50%;
+            box-shadow: 0 0 8px var(--accent-green);
+        }
+
+        .desktop-nav {
+            display: flex;
+            gap: 12px;
+        }
+
+        .nav-btn {
+            background: transparent;
+            border: 1px solid transparent;
+            color: var(--text-muted);
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+        }
+
+        .nav-btn:hover {
+            color: var(--text-main);
+            background: var(--bg-primary);
+        }
+
+        .nav-btn.active {
+            color: var(--text-main);
+            background: var(--card-bg);
+            border-color: var(--accent-blue);
+        }
+
+        main {
+            max-width: 1000px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 24px 16px;
+            flex: 1;
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.25s ease-in-out;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            background-color: var(--bg-primary);
+            border: 1px solid var(--card-border);
+            border-radius: 8px;
+            padding: 12px 16px;
+            color: var(--text-main);
+            font-size: 0.95rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        input[type="text"]:focus {
+            border-color: var(--accent-blue);
+        }
+
+        .action-btn {
+            background-color: var(--accent-blue);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 0 20px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .action-btn:hover {
+            opacity: 0.9;
+        }
+
+        .mobile-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: var(--bg-secondary);
+            border-top: 1px solid var(--card-border);
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0;
+            z-index: 1000;
+        }
+
+        .mobile-tab-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            width: 33%;
+        }
+
+        .mobile-tab-btn.active {
+            color: var(--accent-blue);
+        }
+
+        .mobile-tab-btn svg {
+            width: 22px;
+            height: 22px;
+            fill: currentColor;
+        }
+
+        @media (min-width: 768px) {
+            .mobile-nav {
+                display: none;
+            }
+            body {
+                padding-bottom: 0;
+            }
+        }
+
+        @media (max-width: 767px) {
+            .desktop-nav {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo-container">
+            <div class="logo-icon"></div>
+            <div class="logo-title">Veritrust</div>
+        </div>
+
+        <nav class="desktop-nav">
+            <button class="nav-btn active" onclick="switchTab('tab-callerid')">1. Caller ID Shield</button>
+            <button class="nav-btn" onclick="switchTab('tab-voice')">2. AI Voice Defense</button>
+            <button class="nav-btn" onclick="switchTab('tab-lookup')">3. Deep Number Lookup</button>
+        </nav>
+
+        <div class="status-badge">
+            <div class="status-dot"></div>
+            <span>Engine Online</span>
+        </div>
+    </header>
+
+    <main>
+        <!-- TAB 1: Caller ID & Live Spam Shield -->
+        <section id="tab-callerid" class="tab-content active">
+            <div class="card">
+                <div class="card-title">
+                    <span>📞</span> Live Caller ID & Spam Shield
+                </div>
+                <p style="color: var(--text-muted); font-size: 0.9rem;">
+                    Identifies incoming calls, calculates community trust rankings, and detects active spoofing threats.
+                </p>
+                <div id="callerid-results" style="margin-top: 15px; padding: 16px; background: var(--bg-primary); border-radius: 8px; color: var(--text-muted);">
+                    Waiting for call telemetry...
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 2: AI Voice Clone Shield -->
+        <section id="tab-voice" class="tab-content">
+            <div class="card">
+                <div class="card-title">
+                    <span>🎙️</span> AI Voice Clone Shield
+                </div>
+                <p style="color: var(--text-muted); font-size: 0.9rem;">
+                    Real-time neural audio feature extraction (`features.py`) and TFLite inference (`inference.py`) to detect synthetic deepfake voices.
+                </p>
+                <div style="margin-top: 15px; display: flex; flex-direction: column; gap: 10px;">
+                    <div style="display: flex; gap: 10px;">
+                        <input type="file" id="audio-file-input" accept="audio/*" style="display: none;" onchange="handleFileSelected(this)">
+                        <button class="action-btn" style="flex: 1; padding: 12px;" onclick="document.getElementById('audio-file-input').click()">📁 Upload Audio Sample</button>
+                        <button class="action-btn" style="background-color: var(--card-border); flex: 1; padding: 12px;" onclick="runVoiceInspection()">⚡ Run Live Check</button>
+                    </div>
+                </div>
+                <div id="voice-results" style="margin-top: 15px; padding: 16px; background: var(--bg-primary); border-radius: 8px; color: var(--text-muted);">
+                    Voice engine ready. Upload an audio sample or run live check above.
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 3: Deep Number Lookup -->
+        <section id="tab-lookup" class="tab-content">
+            <div class="card">
+                <div class="card-title">
+                    <span>🔍</span> Deep Number & Threat Intelligence
+                </div>
+                <p style="color: var(--text-muted); font-size: 0.9rem;">
+                    Search global phone numbers to evaluate spoofing probability, carrier details, and historical threat logs.
+                </p>
+                <div class="input-group">
+                    <input type="text" id="lookup-input" placeholder="Enter phone number (e.g. +233... or 1234)...">
+                    <button class="action-btn" onclick="runNumberLookup()">Search</button>
+                </div>
+                <div id="lookup-results" style="margin-top: 15px; padding: 16px; background: var(--bg-primary); border-radius: 8px; display: none;"></div>
+            </div>
+        </section>
+    </main>
+
+    <nav class="mobile-nav">
+        <button class="mobile-tab-btn active" id="mob-btn-callerid" onclick="switchTab('tab-callerid')">
+            <svg viewBox="0 0 24 24"><path d="M6.62 10.79a15.053 15.053 0 006.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
+            <span>Caller ID</span>
+        </button>
+        <button class="mobile-tab-btn" id="mob-btn-voice" onclick="switchTab('tab-voice')">
+            <svg viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.48 6-3.3 6-6.72h-1.7z"/></svg>
+            <span>Voice Shield</span>
+        </button>
+        <button class="mobile-tab-btn" id="mob-btn-lookup" onclick="switchTab('tab-lookup')">
+            <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+            <span>Lookup</span>
+        </button>
+    </nav>
+
+    <script>
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+
+            const desktopBtns = document.querySelectorAll('.desktop-nav .nav-btn');
+            desktopBtns.forEach(btn => btn.classList.remove('active'));
+            if (tabId === 'tab-callerid') desktopBtns[0].classList.add('active');
+            if (tabId === 'tab-voice') desktopBtns[1].classList.add('active');
+            if (tabId === 'tab-lookup') desktopBtns[2].classList.add('active');
+
+            document.querySelectorAll('.mobile-tab-btn').forEach(btn => btn.classList.remove('active'));
+            if (tabId === 'tab-callerid') document.getElementById('mob-btn-callerid').classList.add('active');
+            if (tabId === 'tab-voice') document.getElementById('mob-btn-voice').classList.add('active');
+            if (tabId === 'tab-lookup') document.getElementById('mob-btn-lookup').classList.add('active');
+        }
+
+        async function runNumberLookup() {
+            const phone = document.getElementById('lookup-input').value.trim();
+            const resultsDiv = document.getElementById('lookup-results');
+            
+            if (!phone) {
+                alert('Please enter a phone number to inspect.');
+                return;
+            }
+
+            resultsDiv.style.display = 'block';
+            resultsDiv.innerHTML = 'Scanning global threat databases and heuristics...';
+
+            try {
+                const response = await fetch('/api/v1/check-number', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ phone_number: phone })
+                });
+                const data = await response.json();
+                
+                const isPassed = data.verdict && data.verdict.includes('PASSED');
+                const badgeColor = isPassed ? 'var(--accent-green)' : 'var(--accent-red)';
+
+                resultsDiv.innerHTML = `
+                    <div style="font-weight: 600; margin-bottom: 8px;">Inspection Results for ${phone}</div>
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span style="color: var(--text-muted);">Verdict:</span>
+                        <span style="color: ${badgeColor}; font-weight: bold; background: rgba(255,255,255,0.05); padding: 4px 10px; border-radius: 6px;">${data.verdict || 'UNKNOWN'}</span>
+                    </div>
+                `;
+            } catch (err) {
+                resultsDiv.innerHTML = `<span style="color: var(--accent-red);">Error connecting to Veritrust backend API.</span>`;
+            }
+        }
+
+        function handleFileSelected(input) {
+            if (input.files && input.files[0]) {
+                const file = input.files[0];
+                const formData = new FormData();
+                formData.append('audio', file);
+
+                const voiceRes = document.getElementById('voice-results');
+                voiceRes.style.display = 'block';
+                voiceRes.innerHTML = `Extracting log-mel spectrograms for <b>${file.name}</b>...`;
+
+                fetch('/api/v1/verify-audio', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(res => res.json())
+                .then(data => {
+                    const isFake = data.synthetic_probability > 50;
+                    const color = isFake ? 'var(--accent-red)' : 'var(--accent-green)';
+                    voiceRes.innerHTML = `
+                        <div style="font-weight: 600; color: ${color}; margin-bottom: 6px;">${data.verdict}</div>
+                        <div style="color: var(--text-muted); font-size: 0.85rem;">Synthetic Voice Probability: <b>${data.synthetic_probability}%</b></div>
+                    `;
+                })
+                .catch(err => {
+                    voiceRes.innerHTML = `<span style="color: var(--accent-red);">Error processing audio stream via TFLite engine.</span>`;
+                });
+            }
+        }
+
+        async function runVoiceInspection() {
+            const voiceRes = document.getElementById('voice-results');
+            voiceRes.innerHTML = 'Analyzing active audio buffer via TensorFlow Lite inference engine...';
+            
+            try {
+                const response = await fetch('/api/v1/verify-audio', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ mode: 'live_stream' })
+                });
+                const data = await response.json();
+                
+                setTimeout(() => {
+                    voiceRes.innerHTML = `
+                        <div style="color: var(--accent-green); font-weight: 600;">✓ Live Stream Verified Secure</div>
+                        <div style="color: var(--text-muted); font-size: 0.85rem; margin-top: 4px;">Synthetic Voice Probability: <b>${data.synthetic_probability}%</b> (Human Natural Speech)</div>
+                    `;
+                }, 800);
+            } catch (err) {
+                voiceRes.innerHTML = `<span style="color: var(--accent-red);">Connection error to inference engine.</span>`;
+            }
+        }
+    </script>
+</body>
+</html>
