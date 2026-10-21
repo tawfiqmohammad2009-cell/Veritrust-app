@@ -22,11 +22,10 @@ public class MainActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(
+        requestDefaultDialerRole();
 
-        Button defaultDialerButton = findViewById(R.id.btnDefaultDialer);
-        if (defaultDialerButton != null) {
-            defaultDialerButton.setOnClickListener(v -> requestDefaultDialerRole());
-        }
+
+        
 savedInstanceState);
 
         WebView webView = new WebView(this);
