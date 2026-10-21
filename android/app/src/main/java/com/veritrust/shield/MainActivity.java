@@ -163,7 +163,7 @@ public class MainActivity extends Activity {
         final TextView resultBox = new TextView(this);
         resultBox.setText("Results will appear here after search.");
         resultBox.setTextSize(16);
-        resultBox.setTextColor(android.graphics.Color.LIGHTGRAY);
+        resultBox.setTextColor(android.graphics.Color.LTGRAY);
         resultBox.setPadding(0, 32, 0, 0);
         root.addView(resultBox);
 
