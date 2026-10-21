@@ -9,55 +9,47 @@ import java.net.URL;
 
 public class VeritrustCallService extends InCallService {
     private static final String TAG = "VeritrustCallService";
-    // Pointing to your local Flask backend endpoint
-    private static final String API_URL = "http://10.24.99.178:5000/api/v1/check-number";
 
     @Override
     public void onCallAdded(Call call) {
         super.onCallAdded(call);
-        
+        String phoneNumber = "";
         if (call.getDetails() != null && call.getDetails().getHandle() != null) {
-            String phoneNumber = call.getDetails().getHandle().getSchemeSpecificPart();
-            Log.d(TAG, "Incoming call intercepted from: " + phoneNumber);
-            
-            // Send phone number to Flask threat-detection engine in a background thread
-            checkNumberWithFlask(phoneNumber);
+            phoneNumber = call.getDetails().getHandle().getSchemeSpecificPart();
         }
+        Log.d(TAG, "Call intercepted: " + phoneNumber);
+        sendCallToServer(phoneNumber);
     }
 
-    private void checkNumberWithFlask(final String phoneNumber) {
+    @Override
+    public void onCallRemoved(Call call) {
+        super.onCallRemoved(call);
+        Log.d(TAG, "Call ended");
+    }
+
+    private void sendCallToServer(final String number) {
         new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
-                    URL url = new URL(API_URL);
+                    URL url = new URL("http://10.0.2.2:5000/log_call");
                     HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                     conn.setRequestMethod("POST");
                     conn.setRequestProperty("Content-Type", "application/json; utf-8");
-                    conn.setRequestProperty("Accept", "application/json");
                     conn.setDoOutput(true);
 
-                    // JSON payload with the intercepted phone number
-                    String jsonInputString = "{\"phone\": \"" + phoneNumber + "\"}";
-
+                    String jsonInputString = "{\"phone_number\": \"" + number + "\"}";
                     try (OutputStream os = conn.getOutputStream()) {
                         byte[] input = jsonInputString.getBytes("utf-8");
                         os.write(input, 0, input.length);
                     }
 
                     int responseCode = conn.getResponseCode();
-                    Log.d(TAG, "Flask API Response Code: " + responseCode);
-
+                    Log.d(TAG, "Server sync status: " + responseCode);
                 } catch (Exception e) {
-                    Log.e(TAG, "Failed to connect to Flask threat-detection engine", e);
+                    Log.e(TAG, "Failed to connect to Flask backend", e);
                 }
             }
         }).start();
-    }
-
-    @Override
-    public void onCallRemoved(Call call) {
-        super.onCallRemoved(call);
-        Log.d(TAG, "Call ended.");
     }
 }
