@@ -30,7 +30,7 @@ jobs:
           gradle-version: '8.7'
 
       - name: Build Debug APK
-        run: gradle assembleDebug --info --stacktrace
+        run: gradle assembleDebug --console plain --stacktrace
         working-directory: android
 
       - name: Upload APK Artifact
