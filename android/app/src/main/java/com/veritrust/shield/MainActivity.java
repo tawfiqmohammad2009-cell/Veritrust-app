@@ -7,7 +7,6 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.Gravity;
-import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
@@ -20,7 +19,6 @@ import android.widget.Toast;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.io.InputStream;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 
@@ -40,14 +38,12 @@ public class MainActivity extends Activity {
         Button navLookup = findViewById(R.id.nav_lookup);
         Button navShield = findViewById(R.id.nav_shield);
 
-        // Default: Open Dialer Section
         showSection1Dialer();
 
         navDialer.setOnClickListener(v -> showSection1Dialer());
         navLookup.setOnClickListener(v -> showSection2Lookup());
         navShield.setOnClickListener(v -> showSection3AIShield());
 
-        // Prompt for default dialer role on Android 10+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             RoleManager roleManager = getSystemService(RoleManager.class);
             if (roleManager != null && roleManager.isRoleAvailable(RoleManager.ROLE_DIALER)) {
@@ -59,9 +55,6 @@ public class MainActivity extends Activity {
         }
     }
 
-    // ==========================================
-    // SECTION 1: FULL DIALER & MESSAGING
-    // ==========================================
     private void showSection1Dialer() {
         container.removeAllViews();
 
@@ -69,26 +62,23 @@ public class MainActivity extends Activity {
         root.setOrientation(LinearLayout.VERTICAL);
         root.setPadding(32, 32, 32, 32);
 
-        // Number Display Screen
         final TextView numberDisplay = new TextView(this);
         numberDisplay.setText(currentPhoneNumber.isEmpty() ? "Enter Number" : currentPhoneNumber);
-        numberDisplay.setTextSize(28sp);
+        numberDisplay.setTextSize(28);
         numberDisplay.setTextColor(android.graphics.Color.WHITE);
         numberDisplay.setGravity(Gravity.CENTER);
         numberDisplay.setPadding(16, 32, 16, 32);
         root.addView(numberDisplay);
 
-        // Keypad Grid (3x4)
         GridLayout keypad = new GridLayout(this);
         keypad.setColumnCount(3);
         keypad.setRowCount(4);
-        keypad.setAlignmentMode(GridLayout.ALIGN_BOUNDS);
 
         String[] keys = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "*", "0", "#"};
         for (String key : keys) {
             Button btn = new Button(this);
             btn.setText(key);
-            btn.setTextSize(22sp);
+            btn.setTextSize(22);
             btn.setTextColor(android.graphics.Color.WHITE);
             btn.setOnClickListener(v -> {
                 currentPhoneNumber += key;
@@ -98,7 +88,6 @@ public class MainActivity extends Activity {
         }
         root.addView(keypad);
 
-        // Action Buttons Row (Call, SMS, Clear)
         LinearLayout actions = new LinearLayout(this);
         actions.setOrientation(LinearLayout.HORIZONTAL);
         actions.setPadding(0, 32, 0, 0);
@@ -140,14 +129,10 @@ public class MainActivity extends Activity {
         actions.addView(btnCall);
         actions.addView(btnSms);
         actions.addView(btnClear);
-
         root.addView(actions);
         container.addView(root);
     }
 
-    // ==========================================
-    // SECTION 2: FRAUD / NUMBER CHECK LOOKUP
-    // ==========================================
     private void showSection2Lookup() {
         container.removeAllViews();
 
@@ -157,7 +142,7 @@ public class MainActivity extends Activity {
 
         TextView title = new TextView(this);
         title.setText("🔍 Fraud & Identity Lookup");
-        title.setTextSize(22sp);
+        title.setTextSize(22);
         title.setTextColor(android.graphics.Color.WHITE);
         title.setGravity(Gravity.CENTER);
         title.setPadding(0, 0, 0, 24);
@@ -167,7 +152,7 @@ public class MainActivity extends Activity {
         inputNumber.setHint("Enter phone number (e.g. +233...)");
         inputNumber.setHintTextColor(android.graphics.Color.GRAY);
         inputNumber.setTextColor(android.graphics.Color.WHITE);
-        inputNumber.setTextSize(18sp);
+        inputNumber.setTextSize(18);
         root.addView(inputNumber);
 
         Button btnCheck = new Button(this);
@@ -177,7 +162,7 @@ public class MainActivity extends Activity {
 
         final TextView resultBox = new TextView(this);
         resultBox.setText("Results will appear here after search.");
-        resultBox.setTextSize(16sp);
+        resultBox.setTextSize(16);
         resultBox.setTextColor(android.graphics.Color.LIGHTGRAY);
         resultBox.setPadding(0, 32, 0, 0);
         root.addView(resultBox);
@@ -190,7 +175,6 @@ public class MainActivity extends Activity {
             }
             resultBox.setText("Analyzing background logs & threat database for " + target + "...");
             
-            // Query local Flask backend off main UI thread
             new Thread(() -> {
                 try {
                     URL url = new URL("http://127.0.0.1:5000/check_number");
@@ -224,9 +208,6 @@ public class MainActivity extends Activity {
         container.addView(root);
     }
 
-    // ==========================================
-    // SECTION 3: AUTOMATIC AI CLONE VOICE SHIELD
-    // ==========================================
     private void showSection3AIShield() {
         container.removeAllViews();
 
@@ -237,7 +218,7 @@ public class MainActivity extends Activity {
 
         TextView title = new TextView(this);
         title.setText("🛡️ AI Voice Clone Detector");
-        title.setTextSize(22sp);
+        title.setTextSize(22);
         title.setTextColor(android.graphics.Color.WHITE);
         title.setGravity(Gravity.CENTER);
         title.setPadding(0, 0, 0, 16);
@@ -245,7 +226,7 @@ public class MainActivity extends Activity {
 
         TextView statusBanner = new TextView(this);
         statusBanner.setText("● AUTOMATIC MONITORING ACTIVE\nVeritrust is inspecting live audio streams on active calls.");
-        statusBanner.setTextSize(14sp);
+        statusBanner.setTextSize(14);
         statusBanner.setTextColor(android.graphics.Color.GREEN);
         statusBanner.setPadding(16, 16, 16, 16);
         statusBanner.setBackgroundColor(0xFF1E3A1E);
@@ -253,7 +234,7 @@ public class MainActivity extends Activity {
 
         TextView desc = new TextView(this);
         desc.setText("\nWhen a call connects, Veritrust checks caller acoustic signatures for synthesis, spectral pitch shifts, and AI deepfake models.\n\nIf a synthesized voice is detected during a call, a High-Priority Scam Alert overlay will trigger automatically on screen.");
-        desc.setTextSize(15sp);
+        desc.setTextSize(15);
         desc.setTextColor(android.graphics.Color.WHITE);
         root.addView(desc);
 
