@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Local databases and private data
+*.db
+*.sqlite
+*.sqlite3
+
+# Signing keys and secrets
+*.jks
+*.keystore
+.env
+
+# Local backups and diagnostic reports
+*.backup
+*.backup*
+veritrust_diagnostic_report.txt
+
+# Android build outputs
+.gradle/
+**/build/
+local.properties
+
+# Generated APKs
+*.apk
+*.aab
